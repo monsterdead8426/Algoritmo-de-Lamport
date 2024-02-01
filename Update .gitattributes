@@ -1,0 +1,71 @@
+from sqlalchemy import create_engine, Column, Integer, String, Date
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import pandas as pd
+import csv
+
+Base = declarative_base()
+
+class Entidad(Base):
+    __tablename__ = 'entidades'
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String)
+    fecha = Column(Date)
+    cantidad = Column(Integer)
+
+engine = create_engine('sqlite:///:memory:')  # Reemplaza con tu conexión a la base de datos
+
+Base.metadata.create_all(bind=engine)
+
+# Aquí deberías tener la lógica para agregar datos a la base de datos
+
+def informe_entidades():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    entidades = session.query(Entidad).all()
+    for entidad in entidades:
+        print(entidad.id, entidad.nombre, entidad.fecha, entidad.cantidad)
+
+def informe_entidades_por_fecha():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    entidades = session.query(Entidad).all()
+    df = pd.DataFrame([(e.fecha, e.id, e.cantidad) for e in entidades], columns=['fecha', 'id', 'cantidad'])
+    for fecha, entidades_por_fecha in df.groupby('fecha'):
+        print(fecha)
+        for index, row in entidades_por_fecha.iterrows():
+            print(row['id'], row['cantidad'])
+
+def informe_entidades_por_cantidad():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    entidades = session.query(Entidad).all()
+    df = pd.DataFrame([(e.cantidad, e.id, e.nombre) for e in entidades], columns=['cantidad', 'id', 'nombre'])
+    for cantidad, entidades_por_cantidad in df.groupby('cantidad'):
+        print(cantidad)
+        for index, row in entidades_por_cantidad.iterrows():
+            print(row['id'], row['nombre'])
+
+def informe_entidades_por_nombre_personalizado():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    entidades = session.query(Entidad).all()
+    df = pd.DataFrame([(e.nombre, e.id, e.fecha, e.cantidad) for e in entidades], columns=['nombre', 'id', 'fecha', 'cantidad'])
+    for nombre, entidades_por_nombre in df.groupby('nombre'):
+        print(nombre, len(entidades_por_nombre))
+
+def informe_entidades_a_csv():
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    entidades = session.query(Entidad).all()
+    with open('ConsumerComplaints.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        for entidad in entidades:
+            writer.writerow([entidad.id, entidad.nombre, entidad.fecha, entidad.cantidad])
+
+# Llamadas a las funciones
+informe_entidades()
+informe_entidades_por_fecha()
+informe_entidades_por_cantidad()
+informe_entidades_por_nombre_personalizado()
+informe_entidades_a_csv()

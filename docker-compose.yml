@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  node_a:
+    build: .
+    container_name: node_a
+    ports:
+      - "5001:5000"
+    command: ["python", "app.py", "Node_A"]
+
+  node_b:
+    build: .
+    container_name: node_b
+    ports:
+      - "5002:5000"
+    command: ["python", "app.py", "Node_B"]
+
+  node_c:
+    build: .
+    container_name: node_c
+    ports:
+      - "5003:5000"
+    command: ["python", "app.py", "Node_C"]
